@@ -21,7 +21,7 @@ Se il vocale non ha l'opzione Condividi, usa **Scegli file** e vai in
 Impostazioni e storico (IndexedDB) restano sul telefono. La chiave API del motore remoto è cifrata (AES-GCM, chiave non esportabile) in un archivio IndexedDB separato, non in `localStorage`.
 
 ## Offline
-`sw.js` mette in cache i file dell'app e la libreria (jsDelivr, versione fissata in `worker.js`). Dopo **Impostazioni > Scarica modello** l'app si apre e trascrive senza rete. Quando cambi i file dell'app alza `VERSION` in `sw.js`.
+`sw.js` mette in cache i file dell'app e la libreria (jsDelivr, versione fissata in `worker.js`). Dopo **Impostazioni > Scarica modello** l'app si apre e trascrive senza rete. Quando cambi i file dell'app alza `VERSION` in `sw.js`. I file dell'app si caricano prima dalla rete (con ripiego sulla cache dopo 3 s), quindi un aggiornamento si vede subito.
 
 ## Sicurezza
 `_headers` (formato Cloudflare/Netlify) imposta una Content-Security-Policy restrittiva (script solo da sé e da jsDelivr). Se cambi CDN o aggiungi risorse esterne, aggiorna la CSP.

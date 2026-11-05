@@ -3,7 +3,7 @@ const SHARE_CACHE = 'shared-audio';
 const SHARE_KEY = 'shared-audio-file';
 
 // Bump this on every change to the app files: it invalidates the old cached copy.
-const VERSION = 'v6';
+const VERSION = 'v7';
 const SHELL_CACHE = `ws-shell-${VERSION}`;
 const LIB_CACHE = `ws-lib-${VERSION}`;
 const SHELL_FILES = ['./', 'index.html', 'app.js', 'worker.js', 'manifest.webmanifest', 'logo.svg', 'icon-192.png', 'icon-512.png'];
@@ -44,7 +44,7 @@ self.addEventListener('fetch', (event) => {
     event.respondWith(cacheFirst(req, LIB_CACHE));
     return;
   }
-  // App files: served from the local copy, refreshed in the background.
+  // App files: network first with a cached fallback.
   if (url.origin === self.location.origin) {
     event.respondWith(appFile(req, url));
   }
@@ -69,13 +69,17 @@ async function appFile(req, url) {
   if (isPage && url.pathname !== appPath && url.pathname !== appPath + 'index.html') return fetch(req);
   const key = isPage ? new URL('./', self.location).href : req.url;
   const hit = await cache.match(key, { ignoreSearch: true });
-  const update = fetch(req).then((res) => {
+  const net = fetch(req).then((res) => {
     if (res.ok && !res.redirected) cache.put(key, res.clone());
     return res;
   }).catch(() => null);
-  if (hit) { update.catch(() => {}); return hit; }
-  const res = await update;
-  return res || new Response('Offline', { status: 503, headers: { 'content-type': 'text/plain; charset=utf-8' } });
+  if (!hit) {
+    const res = await net;
+    return res || new Response('Offline', { status: 503, headers: { 'content-type': 'text/plain; charset=utf-8' } });
+  }
+  // Network first, so a new version shows up on the next open; fall back to the cached copy when offline or slow (3 s).
+  const res = await Promise.race([net, new Promise((r) => setTimeout(() => r(null), 3000))]);
+  return res && res.ok ? res : hit;
 }
 
 async function handleShare(request, url) {
