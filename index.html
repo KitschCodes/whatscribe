@@ -88,6 +88,7 @@
   .bar > i { display: block; height: 100%; width: 0; background: linear-gradient(90deg, var(--violet), var(--cyan)); border-radius: 3px; transition: width .2s; }
   .empty { color: var(--muted); font-size: 14px; text-align: center; padding: 24px 0; }
 
+  .install { display: block; width: 100%; margin-top: 10px; padding: 12px; border-radius: 999px; text-align: center; font-size: 15px; }
   .pick { display: block; position: relative; overflow: hidden; text-align: center; padding: 16px; font-size: 16px; border-radius: 999px; }
   .pick::after { content: ""; position: absolute; top: 0; bottom: 0; left: -40%; width: 30%; background: linear-gradient(100deg, transparent, rgba(255,255,255,.5), transparent); transform: skewX(-20deg); animation: sheen 6s ease-in-out 1.2s infinite; pointer-events: none; }
   @keyframes sheen { 0%, 60% { left: -40%; } 100% { left: 130%; } }
@@ -200,6 +201,7 @@
   <div id="view-home">
     <label class="btn primary pick" for="file">Scegli file</label>
     <input type="file" id="file" accept="audio/*,.opus,.ogg,.m4a">
+    <button id="btn-install" class="install" type="button" hidden>Installa l’app sul telefono</button>
 
     <section id="current" class="card" hidden>
       <div class="row" style="justify-content:space-between">

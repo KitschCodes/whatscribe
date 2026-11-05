@@ -489,6 +489,24 @@ document.addEventListener('click', closeMenu);
 for (const b of document.querySelectorAll('[data-back]')) b.onclick = () => history.back();
 window.addEventListener('popstate', (e) => showView((e.state && e.state.v) || 'home'));
 
+// ---------- install button ----------
+// Chrome fires beforeinstallprompt only when it decides the app is installable (and not always);
+// keep the event and offer our own button, which stays hidden when the app is already installed.
+let installEvent = null;
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  installEvent = e;
+  $('btn-install').hidden = false;
+});
+$('btn-install').addEventListener('click', async () => {
+  if (!installEvent) return;
+  const ev = installEvent;
+  installEvent = null;
+  $('btn-install').hidden = true;
+  try { await ev.prompt(); } catch {}
+});
+window.addEventListener('appinstalled', () => { installEvent = null; $('btn-install').hidden = true; });
+
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('sw.js').catch((e) => console.warn('SW non registrato', e));
 }
