@@ -1,0 +1,297 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow, noarchive">
+<meta name="theme-color" content="#0b0a1f">
+<title>WhatScribe</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/svg+xml" href="logo.svg">
+<link rel="apple-touch-icon" href="icon-192.png">
+<style>
+  :root {
+    --ink: #0b0a1f; --text: #f1f0ff; --muted: #a9a6cf; --err: #ff8aa0;
+    --violet: #8b6cff; --cyan: #4fd8f5; --pink: #ff6fb5;
+    --glass: rgba(255,255,255,.07); --glass-hi: rgba(255,255,255,.13); --edge: rgba(255,255,255,.17);
+    --r: 26px;
+    font-family: ui-rounded, "SF Pro Rounded", "Nunito", "Segoe UI Variable", system-ui, -apple-system, Roboto, sans-serif;
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  [hidden] { display: none !important; }
+  html { background: var(--ink); }
+  body { margin: 0; color: var(--text); min-height: 100dvh; padding: env(safe-area-inset-top) 0 env(safe-area-inset-bottom); }
+  main { max-width: 640px; margin: 0 auto; padding: 16px 16px 48px; }
+
+  /* background: five drifting blobs (transform only, light on the GPU) */
+  .bg { position: fixed; inset: 0; z-index: -1; overflow: hidden; background: radial-gradient(120% 80% at 50% 0%, #17133a 0%, var(--ink) 60%); view-transition-name: bg; }
+  .bg i { position: absolute; display: block; filter: blur(32px); will-change: transform; transition: opacity 1.2s; }
+  .bg .b1 { width: min(78vw, 460px); aspect-ratio: 1; top: -8%; left: -22%; background: linear-gradient(135deg, #7a55ff, #b06bff); border-radius: 58% 42% 63% 37% / 44% 56% 44% 56%; opacity: .75; animation: d1 17s ease-in-out infinite alternate; }
+  .bg .b2 { width: min(70vw, 420px); aspect-ratio: 1; top: 30%; right: -30%; background: linear-gradient(135deg, #2cc9f0, #4f7bff); border-radius: 41% 59% 38% 62% / 57% 36% 64% 43%; opacity: .6; animation: d2 21s ease-in-out infinite alternate; }
+  .bg .b3 { width: min(74vw, 440px); aspect-ratio: 1; bottom: -14%; left: 2%; background: linear-gradient(135deg, #ff5fa8, #ff9a6b); border-radius: 62% 38% 46% 54% / 40% 60% 40% 60%; opacity: .5; animation: d3 19s ease-in-out infinite alternate; }
+  .bg .b4 { width: min(46vw, 280px); aspect-ratio: 1; top: 52%; left: -12%; background: linear-gradient(135deg, #5cf2c0, #2cc9f0); border-radius: 50% 50% 38% 62% / 55% 40% 60% 45%; opacity: .38; animation: d4 14s ease-in-out infinite alternate; }
+  .bg .b5 { width: min(40vw, 240px); aspect-ratio: 1; top: 6%; right: -8%; background: linear-gradient(135deg, #ff6fb5, #8b6cff); border-radius: 44% 56% 61% 39% / 46% 58% 42% 54%; opacity: .45; animation: d5 16s ease-in-out infinite alternate; }
+  @keyframes d1 { 0% { transform: translate3d(0,0,0) rotate(0) scale(1); } 50% { transform: translate3d(34vw,12vh,0) rotate(70deg) scale(1.18); } 100% { transform: translate3d(14vw,38vh,0) rotate(150deg) scale(.92); } }
+  @keyframes d2 { 0% { transform: translate3d(0,0,0) rotate(0) scale(1); } 50% { transform: translate3d(-42vw,-14vh,0) rotate(-80deg) scale(1.2); } 100% { transform: translate3d(-18vw,26vh,0) rotate(-160deg) scale(.9); } }
+  @keyframes d3 { 0% { transform: translate3d(0,0,0) rotate(0) scale(1); } 50% { transform: translate3d(30vw,-22vh,0) rotate(90deg) scale(1.15); } 100% { transform: translate3d(48vw,-6vh,0) rotate(190deg) scale(1.05); } }
+  @keyframes d4 { 0% { transform: translate3d(0,0,0) scale(1); } 100% { transform: translate3d(52vw,-26vh,0) rotate(120deg) scale(1.35); } }
+  @keyframes d5 { 0% { transform: translate3d(0,0,0) scale(1); } 100% { transform: translate3d(-48vw,34vh,0) rotate(-110deg) scale(1.3); } }
+  body.working .bg i { opacity: .95; }
+  body.working .brand img { animation: breathe 1.4s ease-in-out infinite; }
+  @keyframes breathe { 50% { transform: scale(1.14) rotate(-6deg); filter: drop-shadow(0 4px 22px rgba(79,216,245,.9)); } }
+  @media (prefers-reduced-motion: reduce) { .bg i, .brand img { animation: none !important; } * { transition-duration: .01ms !important; } }
+
+  /* glass */
+  .glass, .card {
+    background: linear-gradient(145deg, rgba(255,255,255,.12), rgba(255,255,255,.04));
+    border: 1px solid var(--edge); border-radius: var(--r);
+    box-shadow: 0 10px 40px rgba(6,4,30,.35), inset 0 1px 0 rgba(255,255,255,.22);
+    -webkit-backdrop-filter: blur(22px) saturate(1.5); backdrop-filter: blur(22px) saturate(1.5);
+  }
+  .card { padding: 16px; }
+  @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+    .glass, .card, .menu { background: rgba(30,26,70,.92); }
+  }
+
+  header { display: flex; align-items: center; justify-content: space-between; margin: 4px 0 20px; }
+  .brand { display: flex; align-items: center; gap: 10px; }
+  .brand img { width: 36px; height: 36px; filter: drop-shadow(0 4px 14px rgba(139,108,255,.6)); }
+  h1 { font-size: 22px; margin: 0; font-weight: 700; letter-spacing: -.02em; }
+  h2 { font-size: 14px; margin: 28px 4px 10px; color: var(--muted); font-weight: 600; letter-spacing: .01em; }
+
+  button, .btn {
+    font: inherit; font-size: 14px; font-weight: 600; color: var(--text); cursor: pointer;
+    background: var(--glass); border: 1px solid var(--edge); border-radius: 999px; padding: 9px 16px;
+    transition: transform .15s, background .15s, box-shadow .15s;
+  }
+  button:hover, .btn:hover { background: var(--glass-hi); }
+  button:active, .btn:active { transform: scale(.96); }
+  button:focus-visible, .btn:focus-visible, input:focus-visible, select:focus-visible, .item-toggle:focus-visible {
+    outline: 2px solid var(--cyan); outline-offset: 2px;
+  }
+  button.primary, .btn.primary {
+    background: linear-gradient(135deg, var(--violet), var(--cyan)) border-box; color: var(--ink); border: 1px solid rgba(255,255,255,.35);
+    box-shadow: 0 8px 26px rgba(99,120,255,.45), inset 0 1px 0 rgba(255,255,255,.45);
+  }
+  button.primary:hover, .btn.primary:hover { background: linear-gradient(135deg, #9a7fff, #66e0f8) border-box; }
+  button:disabled { opacity: .5; cursor: default; }
+  .icon { width: 44px; height: 44px; padding: 0; display: grid; place-items: center; }
+  .icon svg { width: 20px; height: 20px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+
+  .row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+  .meta { color: var(--muted); font-size: 12px; }
+  .text { white-space: pre-wrap; line-height: 1.55; font-size: 16px; margin: 10px 0 12px; user-select: text; }
+  audio { width: 100%; height: 38px; margin-top: 8px; border-radius: 999px; color-scheme: dark; }
+  #status { font-size: 14px; color: var(--muted); min-height: 20px; margin: 10px 0 0; }
+  #status.err { color: var(--err); }
+  .bar { height: 6px; background: rgba(255,255,255,.12); border-radius: 3px; overflow: hidden; margin-top: 10px; display: none; }
+  .bar > i { display: block; height: 100%; width: 0; background: linear-gradient(90deg, var(--violet), var(--cyan)); border-radius: 3px; transition: width .2s; }
+  .empty { color: var(--muted); font-size: 14px; text-align: center; padding: 24px 0; }
+
+  .pick { display: block; position: relative; overflow: hidden; text-align: center; padding: 16px; font-size: 16px; border-radius: 999px; }
+  .pick::after { content: ""; position: absolute; top: 0; bottom: 0; left: -40%; width: 30%; background: linear-gradient(100deg, transparent, rgba(255,255,255,.5), transparent); transform: skewX(-20deg); animation: sheen 6s ease-in-out 1.2s infinite; pointer-events: none; }
+  @keyframes sheen { 0%, 60% { left: -40%; } 100% { left: 130%; } }
+  #current, #intro { margin-top: 14px; }
+  body.working #current { animation: glow 2s ease-in-out infinite; }
+  @keyframes glow { 50% { box-shadow: 0 10px 50px rgba(79,216,245,.5), inset 0 1px 0 rgba(255,255,255,.3); border-color: rgba(79,216,245,.55); } }
+  #current:not([hidden]), #intro:not([hidden]) { animation: rise .5s cubic-bezier(.2,.8,.2,1) both; }
+  body.working #current:not([hidden]) { animation: glow 2s ease-in-out infinite; }
+
+  /* view change: the backdrop stays still, the content slides, fades and comes into focus */
+  #view-home, #view-settings, #view-history { view-transition-name: view; }
+  ::view-transition-old(root), ::view-transition-new(root), ::view-transition-old(bg), ::view-transition-new(bg) { animation: none; mix-blend-mode: normal; }
+  ::view-transition-old(view) { animation: vt-out .3s cubic-bezier(.4,0,1,1) both; }
+  ::view-transition-new(view) { animation: vt-in .5s cubic-bezier(.2,.8,.2,1) both; }
+  html[data-dir="forward"]::view-transition-old(view) { --x: -10%; }
+  html[data-dir="forward"]::view-transition-new(view) { --x: 16%; }
+  html[data-dir="back"]::view-transition-old(view) { --x: 10%; }
+  html[data-dir="back"]::view-transition-new(view) { --x: -16%; }
+  @keyframes vt-out { to { opacity: 0; transform: translateX(var(--x)) scale(.94); filter: blur(10px); } }
+  @keyframes vt-in { from { opacity: 0; transform: translateX(var(--x)) scale(.96); filter: blur(12px); } }
+  .view-in { animation: rise .5s cubic-bezier(.2,.8,.2,1) both; }
+
+  /* menu */
+  .menu-wrap { position: relative; }
+  .menu {
+    position: absolute; right: 0; top: 52px; z-index: 10; min-width: 200px; padding: 6px;
+    background: rgba(28,24,66,.72); border: 1px solid var(--edge); border-radius: 22px;
+    box-shadow: 0 16px 48px rgba(4,2,24,.6), inset 0 1px 0 rgba(255,255,255,.2);
+    -webkit-backdrop-filter: blur(26px) saturate(1.6); backdrop-filter: blur(26px) saturate(1.6);
+    transform-origin: top right; animation: pop .38s cubic-bezier(.34,1.56,.64,1) both;
+  }
+  .menu.closing { animation: unpop .16s ease-in both; }
+  @keyframes pop { from { opacity: 0; transform: scale(.6) translateY(-8px); filter: blur(6px); } to { opacity: 1; transform: none; filter: none; } }
+  @keyframes unpop { to { opacity: 0; transform: scale(.85) translateY(-6px); filter: blur(4px); } }
+  .menu button { animation: slidein .35s cubic-bezier(.2,.8,.2,1) both; }
+  .menu button:nth-child(2) { animation-delay: .06s; }
+  @keyframes slidein { from { opacity: 0; transform: translateX(14px); } to { opacity: 1; transform: none; } }
+  .menu button { display: flex; gap: 12px; align-items: center; width: 100%; border: 0; background: none; text-align: left; padding: 12px; border-radius: 16px; font-weight: 500; font-size: 15px; }
+  .menu button:hover { background: var(--glass-hi); }
+  .menu svg { width: 18px; height: 18px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  .subhead { display: flex; align-items: center; gap: 12px; margin: 4px 0 18px; }
+  .subhead h2 { margin: 0; font-size: 18px; color: var(--text); }
+
+  /* compact, expandable items */
+  .item { padding: 0; margin-bottom: 10px; border-radius: 22px; }
+  .item-row { display: flex; align-items: center; gap: 8px; padding-right: 12px; }
+  .item-toggle {
+    flex: 1; min-width: 0; display: flex; align-items: center; gap: 10px; text-align: left;
+    background: none; border: 0; border-radius: 22px; padding: 12px 8px 12px 16px; font-weight: 400;
+  }
+  .item-toggle:hover { background: none; }
+  .item-txt { flex: 1; min-width: 0; display: block; }
+  .item-meta { display: block; font-size: 12px; color: var(--muted); margin-bottom: 2px; }
+  .item-line { display: block; font-size: 15px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .item-line.pending { color: var(--muted); font-style: italic; }
+  .item.open .item-line { display: none; }
+  .item.open .item-toggle { padding-bottom: 4px; }
+  .chev { width: 18px; height: 18px; flex: none; stroke: var(--muted); fill: none; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; transition: transform .25s; }
+  .item.open .chev { transform: rotate(180deg); }
+  .mini { padding: 7px 14px; font-size: 13px; }
+  .item { transition: background .3s, border-color .3s, box-shadow .3s, transform .3s; }
+  .item.open { border-color: rgba(255,255,255,.3); box-shadow: 0 14px 44px rgba(99,80,255,.35), inset 0 1px 0 rgba(255,255,255,.3); background: linear-gradient(145deg, rgba(255,255,255,.17), rgba(255,255,255,.06)); }
+  .item-inner > * { opacity: 0; transform: translateY(8px); transition: opacity .3s, transform .35s cubic-bezier(.2,.8,.2,1); }
+  .item.open .item-inner > * { opacity: 1; transform: none; }
+  .item.open .item-inner > :nth-child(2) { transition-delay: .06s; }
+  .item.open .item-inner > :nth-child(3) { transition-delay: .12s; }
+  .item.enter { animation: rise .55s cubic-bezier(.2,.8,.2,1) both; animation-delay: calc(var(--i, 0) * 55ms); }
+  @keyframes rise { from { opacity: 0; transform: translateY(18px) scale(.97); filter: blur(6px); } to { opacity: 1; transform: none; filter: none; } }
+  .item-body { display: grid; grid-template-rows: 0fr; transition: grid-template-rows .42s cubic-bezier(.2,.8,.2,1); }
+  .item.open .item-body { grid-template-rows: 1fr; }
+  .item-inner { overflow: hidden; min-height: 0; padding: 0 16px; }
+  .item.open .item-inner { padding-bottom: 14px; }
+  .item-inner .text { margin-top: 2px; font-size: 15px; }
+
+  label { display: block; font-size: 13px; color: var(--muted); margin: 14px 0 6px; }
+  input, select {
+    width: 100%; font: inherit; font-size: 15px; color: var(--text); color-scheme: dark;
+    background: rgba(8,6,32,.45); border: 1px solid var(--edge); border-radius: 16px; padding: 11px 14px;
+  }
+  select option { background: #1a1640; color: var(--text); }
+  input[type=checkbox] { accent-color: var(--violet); }
+  .meta.err { color: var(--err); }
+  .hint { font-size: 12px; color: var(--muted); margin-top: 8px; line-height: 1.45; }
+  .sep { height: 1px; background: var(--edge); margin: 18px 0 4px; }
+  input[type=file] { display: none; }
+</style>
+</head>
+<body>
+<div class="bg" aria-hidden="true"><i class="b1"></i><i class="b2"></i><i class="b3"></i><i class="b4"></i><i class="b5"></i></div>
+<main>
+  <header>
+    <div class="brand"><img src="logo.svg" alt="" width="36" height="36"><h1>WhatScribe</h1></div>
+    <div class="menu-wrap">
+      <button class="icon" id="btn-menu" aria-label="Menu" aria-haspopup="true" aria-expanded="false">
+        <svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+      </button>
+      <div class="menu" id="menu" role="menu" hidden>
+        <button role="menuitem" data-view="settings">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33h0a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51h0a1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82v0a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+          Impostazioni
+        </button>
+        <button role="menuitem" data-view="history">
+          <svg viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5M12 7v5l3 2"/></svg>
+          Storico
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <div id="view-home">
+    <label class="btn primary pick" for="file">Scegli file</label>
+    <input type="file" id="file" accept="audio/*,.opus,.ogg,.m4a">
+
+    <section id="current" class="card" hidden>
+      <div class="row" style="justify-content:space-between">
+        <span class="meta" id="cur-meta"></span>
+      </div>
+      <audio id="cur-audio" controls></audio>
+      <div id="status"></div>
+      <div class="bar" id="bar"><i></i></div>
+      <div class="text" id="cur-text" hidden></div>
+      <div class="row" id="cur-actions" hidden>
+        <button class="primary" id="btn-copy">Copia</button>
+        <button id="btn-share">Condividi</button>
+        <button id="btn-retry">Rifai</button>
+      </div>
+    </section>
+
+    <section id="intro" class="card">
+      <div class="text" style="margin:0;font-size:15px;color:var(--muted)">
+        Su WhatsApp tieni premuto un vocale, tocca <b>Condividi</b> e scegli <b>WhatScribe</b>.
+        Oppure usa <b>Scegli file</b>.
+      </div>
+    </section>
+
+    <div id="recent-wrap" hidden>
+      <h2>Recenti</h2>
+      <div id="recent"></div>
+    </div>
+  </div>
+
+  <div id="view-history" hidden>
+    <div class="subhead">
+      <button class="icon" data-back aria-label="Indietro"><svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg></button>
+      <h2>Storico</h2>
+      <button id="btn-clear" style="margin-left:auto">Svuota</button>
+    </div>
+    <div id="history"></div>
+  </div>
+
+  <div id="view-settings" hidden>
+    <div class="subhead">
+      <button class="icon" data-back aria-label="Indietro"><svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg></button>
+      <h2>Impostazioni</h2>
+    </div>
+    <div class="card">
+      <label for="engine" style="margin-top:0">Motore</label>
+      <select id="engine">
+        <option value="local">Locale sul telefono (Whisper, offline)</option>
+        <option value="remote">API remota (compatibile OpenAI)</option>
+      </select>
+
+      <div id="local-opts">
+        <label for="local-model">Modello locale</label>
+        <select id="local-model">
+          <option value="onnx-community/whisper-base">base (~80 MB, veloce, meno preciso)</option>
+          <option value="onnx-community/whisper-small">small (~250 MB, buon compromesso)</option>
+          <option value="onnx-community/whisper-large-v3-turbo">large-v3-turbo (~800 MB, il migliore, lento senza GPU)</option>
+        </select>
+        <div class="hint">Il modello si scarica al primo uso e resta in cache. Scaricalo qui, con la rete attiva, per usare l’app anche offline. Con WebGPU è molto più veloce.</div>
+        <div class="row" style="margin-top:12px">
+          <button id="btn-model">Scarica modello</button>
+          <span class="meta" id="model-state"></span>
+        </div>
+        <div class="bar" id="model-bar"><i></i></div>
+      </div>
+
+      <div id="remote-opts" hidden>
+        <label for="remote-url">Endpoint</label>
+        <input id="remote-url" placeholder="https://api.groq.com/openai/v1/audio/transcriptions">
+        <label for="remote-key">API key</label>
+        <input id="remote-key" type="password" autocomplete="off" autocapitalize="off" spellcheck="false">
+        <div class="hint">La chiave resta solo su questo telefono, cifrata. <button id="btn-key-clear" type="button" style="all:unset;cursor:pointer;text-decoration:underline">Rimuovi chiave</button></div>
+        <label for="remote-model">Modello</label>
+        <input id="remote-model" placeholder="whisper-large-v3-turbo">
+        <div class="hint">Funziona con Groq, OpenAI o un server tuo che espone /audio/transcriptions.</div>
+      </div>
+
+      <label for="lang">Lingua</label>
+      <select id="lang">
+        <option value="it">Italiano</option>
+        <option value="en">Inglese</option>
+        <option value="es">Spagnolo</option>
+        <option value="fr">Francese</option>
+        <option value="de">Tedesco</option>
+      </select>
+
+      <div class="sep"></div>
+      <label for="keep-audio" style="display:flex;gap:8px;align-items:center;color:var(--text)">
+        <input type="checkbox" id="keep-audio" style="width:auto"> Conserva l'audio dopo la trascrizione
+      </label>
+    </div>
+  </div>
+</main>
+<script type="module" src="app.js"></script>
+</body>
+</html>
