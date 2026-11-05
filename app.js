@@ -165,9 +165,11 @@ let worker = null;
 const mainUi = { status: (t) => setStatus(t), progress: (f) => setProgress(f) };
 
 // Runs a command on the worker (transcription or model download only) and reports status and progress to the given UI.
-function runWorker(msg, ui = mainUi, transfer = []) {
+async function runWorker(msg, ui = mainUi, transfer = []) {
   if (!worker) worker = new Worker('worker.js', { type: 'module' });
   const files = {};
+  // The library also reports progress when it reads files from the local cache: don't call that a download.
+  const fromCache = msg.model ? await isModelCached(msg.model) : false;
   return new Promise((resolve, reject) => {
     worker.onmessage = ({ data }) => {
       if (data.type === 'status') ui.status(data.text);
@@ -176,7 +178,7 @@ function runWorker(msg, ui = mainUi, transfer = []) {
         const v = Object.values(files);
         const loaded = v.reduce((a, x) => a + x[0], 0), total = v.reduce((a, x) => a + x[1], 0);
         ui.progress(total ? loaded / total : null);
-        ui.status(`Scarico il modello… ${Math.round(loaded / 1e6)} / ${Math.round(total / 1e6)} MB`);
+        ui.status(`${fromCache ? 'Carico il modello' : 'Scarico il modello'}… ${Math.round(loaded / 1e6)} / ${Math.round(total / 1e6)} MB`);
       } else if (data.type === 'device') { ui.progress(null); }
       else if (data.type === 'done') { ui.progress(null); resolve(data.text); }
       else if (data.type === 'ready') { ui.progress(null); resolve(); }
@@ -202,7 +204,7 @@ async function refreshModelState() {
   if (busy) return;
   const ok = await isModelCached(settings.localModel);
   $('model-state').textContent = ok ? 'Scaricato, pronto anche offline' : 'Non ancora scaricato';
-  $('btn-model').textContent = ok ? 'Riscarica' : 'Scarica modello';
+  $('btn-model').textContent = ok ? 'Verifica' : 'Scarica modello';
 }
 
 async function downloadModel() {

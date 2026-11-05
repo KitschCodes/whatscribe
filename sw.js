@@ -3,7 +3,7 @@ const SHARE_CACHE = 'shared-audio';
 const SHARE_KEY = 'shared-audio-file';
 
 // Bump this on every change to the app files: it invalidates the old cached copy.
-const VERSION = 'v5';
+const VERSION = 'v6';
 const SHELL_CACHE = `ws-shell-${VERSION}`;
 const LIB_CACHE = `ws-lib-${VERSION}`;
 const SHELL_FILES = ['./', 'index.html', 'app.js', 'worker.js', 'manifest.webmanifest', 'logo.svg', 'icon-192.png', 'icon-512.png'];
