@@ -50,7 +50,7 @@
   }
   .card { padding: 16px; }
   @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
-    .glass, .card, .menu { background: rgba(30,26,70,.92); }
+    .glass, .card { background: rgba(30,26,70,.92); }
   }
 
   header { display: flex; align-items: center; justify-content: space-between; margin: 4px 0 20px; }
@@ -111,24 +111,9 @@
   @keyframes vt-in { from { opacity: 0; transform: translateX(var(--x)) scale(.96); filter: blur(12px); } }
   .view-in { animation: rise .5s cubic-bezier(.2,.8,.2,1) both; }
 
-  /* menu */
-  .menu-wrap { position: relative; }
-  .menu {
-    position: absolute; right: 0; top: 52px; z-index: 10; min-width: 200px; padding: 6px;
-    background: rgba(28,24,66,.72); border: 1px solid var(--edge); border-radius: 22px;
-    box-shadow: 0 16px 48px rgba(4,2,24,.6), inset 0 1px 0 rgba(255,255,255,.2);
-    -webkit-backdrop-filter: blur(26px) saturate(1.6); backdrop-filter: blur(26px) saturate(1.6);
-    transform-origin: top right; animation: pop .38s cubic-bezier(.34,1.56,.64,1) both;
-  }
-  .menu.closing { animation: unpop .16s ease-in both; }
-  @keyframes pop { from { opacity: 0; transform: scale(.6) translateY(-8px); filter: blur(6px); } to { opacity: 1; transform: none; filter: none; } }
-  @keyframes unpop { to { opacity: 0; transform: scale(.85) translateY(-6px); filter: blur(4px); } }
-  .menu button { animation: slidein .35s cubic-bezier(.2,.8,.2,1) both; }
-  .menu button:nth-child(2) { animation-delay: .06s; }
-  @keyframes slidein { from { opacity: 0; transform: translateX(14px); } to { opacity: 1; transform: none; } }
-  .menu button { display: flex; gap: 12px; align-items: center; width: 100%; border: 0; background: none; text-align: left; padding: 12px; border-radius: 16px; font-weight: 500; font-size: 15px; }
-  .menu button:hover { background: var(--glass-hi); }
-  .menu svg { width: 18px; height: 18px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  .listhead { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin: 22px 0 10px; }
+  .listhead h2 { margin: 0; }
+  #btn-more { display: block; margin: 14px auto 0; }
   .subhead { display: flex; align-items: center; gap: 12px; margin: 4px 0 18px; }
   .subhead h2 { margin: 0; font-size: 18px; color: var(--text); }
 
@@ -181,21 +166,9 @@
 <main>
   <header>
     <div class="brand"><img src="logo.svg" alt="" width="36" height="36"><h1>WhatScribe</h1></div>
-    <div class="menu-wrap">
-      <button class="icon" id="btn-menu" aria-label="Menu" aria-haspopup="true" aria-expanded="false">
-        <svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
-      </button>
-      <div class="menu" id="menu" role="menu" hidden>
-        <button role="menuitem" data-view="settings">
-          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33h0a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51h0a1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82v0a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-          Impostazioni
-        </button>
-        <button role="menuitem" data-view="history">
-          <svg viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5M12 7v5l3 2"/></svg>
-          Storico
-        </button>
-      </div>
-    </div>
+    <button class="icon" id="btn-settings" aria-label="Impostazioni">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33h0a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51h0a1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82v0a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+    </button>
   </header>
 
   <div id="view-home">
@@ -226,18 +199,13 @@
     </section>
 
     <div id="recent-wrap" hidden>
-      <h2>Recenti</h2>
+      <div class="listhead">
+        <h2>Trascrizioni</h2>
+        <button id="btn-clear" type="button">Svuota</button>
+      </div>
       <div id="recent"></div>
+      <button id="btn-more" type="button" hidden>Mostra altre</button>
     </div>
-  </div>
-
-  <div id="view-history" hidden>
-    <div class="subhead">
-      <button class="icon" data-back aria-label="Indietro"><svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg></button>
-      <h2>Storico</h2>
-      <button id="btn-clear" style="margin-left:auto">Svuota</button>
-    </div>
-    <div id="history"></div>
   </div>
 
   <div id="view-settings" hidden>

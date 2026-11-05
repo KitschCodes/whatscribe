@@ -363,17 +363,13 @@ function itemCard(it, mode) {
     b.onclick = () => fn(b);
     return b;
   };
-  if (mode === 'recent') {
-    if (it.audio) actions.append(btn(it.text != null ? 'Rifai' : 'Trascrivi', () => process(it.audio, it.name, it.id), it.text == null));
-    if (it.text) actions.append(btn('Copia', (b) => copyText(it.text, b), true));
-  } else {
-    actions.append(btn('Copia', (b) => copyText(it.text, b), true));
-  }
-  actions.append(btn('Elimina', async () => { await dbDel(it.id); renderRecent(); renderHistory(); }));
+  if (it.audio) actions.append(btn(it.text != null ? 'Rifai' : 'Trascrivi', () => process(it.audio, it.name, it.id), it.text == null));
+  if (it.text) actions.append(btn('Copia', (b) => copyText(it.text, b), true));
+  actions.append(btn('Elimina', async () => { await dbDel(it.id); renderRecent(); }));
   inner.append(actions);
 
   // shortcut: a voice note not yet transcribed can be started straight from its row
-  if (mode === 'recent' && it.text == null && it.audio) {
+  if (it.text == null && it.audio) {
     const quick = btn('Trascrivi', () => process(it.audio, it.name, it.id), true);
     quick.classList.add('mini');
     rowEl.append(quick);
@@ -406,27 +402,27 @@ function fillList(box, items, emptyText, mode) {
   box.dataset.seen = '1';
 }
 
+const PAGE = 20;
+let shown = PAGE;
 async function renderRecent() {
-  const items = (await dbAll()).sort((a, b) => b.date - a.date).slice(0, 5);
-  $('recent-wrap').hidden = !items.length;
-  $('intro').hidden = items.length > 0 || !$('current').hidden;
-  fillList($('recent'), items, '', 'recent');
+  // The transcription on screen is the first card above the list, so it is left out of the list.
+  const onScreen = !$('current').hidden && current ? current.id : null;
+  const all = (await dbAll()).sort((a, b) => b.date - a.date).filter((it) => it.id !== onScreen);
+  $('recent-wrap').hidden = !all.length;
+  $('intro').hidden = (all.length > 0 || onScreen != null) || !$('current').hidden;
+  $('btn-more').hidden = all.length <= shown;
+  fillList($('recent'), all.slice(0, shown), '', 'recent');
 }
 
-async function renderHistory() {
-  const items = (await dbAll()).filter((it) => it.text != null).sort((a, b) => b.date - a.date);
-  fillList($('history'), items, 'Ancora nessuna trascrizione.', 'history');
-}
-
-// ---------- views and menu ----------
+// ---------- views ----------
 function showView(v) {
-  const cur = ['home', 'settings', 'history'].find((n) => !$('view-' + n).hidden);
-  if (cur === v) { closeMenu(); return; }
+  const cur = ['home', 'settings'].find((n) => !$('view-' + n).hidden);
+  if (cur === v) return;
   const swap = async () => {
-    for (const n of ['home', 'settings', 'history']) $('view-' + n).hidden = n !== v;
-    closeMenu();
-    delete $('recent').dataset.seen; delete $('history').dataset.seen;
-    if (v === 'history') await renderHistory();
+    for (const n of ['home', 'settings']) $('view-' + n).hidden = n !== v;
+    $('btn-settings').hidden = v === 'settings';
+    delete $('recent').dataset.seen;
+    shown = PAGE;
     if (v === 'home') await renderRecent();
     if (v === 'settings') refreshModelState();
     window.scrollTo(0, 0);
@@ -437,14 +433,6 @@ function showView(v) {
   } else swap();
 }
 function openView(v) { history.pushState({ v }, ''); showView(v); }
-function closeMenu() {
-  const m = $('menu');
-  $('btn-menu').setAttribute('aria-expanded', 'false');
-  if (m.hidden || m.classList.contains('closing')) return;
-  m.classList.add('closing');
-  setTimeout(() => { m.hidden = true; m.classList.remove('closing'); }, 160);
-}
-
 async function copyText(text, btn) {
   try {
     await navigator.clipboard.writeText(text);
@@ -472,20 +460,10 @@ $('btn-model').onclick = downloadModel;
 $('local-model').addEventListener('change', refreshModelState);
 $('btn-clear').onclick = async () => {
   if (!confirm('Svuotare tutto lo storico e i vocali salvati?')) return;
-  await dbClear(); renderRecent(); renderHistory();
+  await dbClear(); renderRecent();
 };
-$('btn-menu').onclick = (e) => {
-  e.stopPropagation();
-  if (!$('menu').hidden && !$('menu').classList.contains('closing')) { closeMenu(); return; }
-  $('menu').classList.remove('closing');
-  $('menu').hidden = false;
-  $('btn-menu').setAttribute('aria-expanded', 'true');
-};
-$('menu').addEventListener('click', (e) => {
-  const b = e.target.closest('[data-view]');
-  if (b) openView(b.dataset.view);
-});
-document.addEventListener('click', closeMenu);
+$('btn-more').onclick = () => { shown += PAGE; renderRecent(); };
+$('btn-settings').onclick = () => openView('settings');
 for (const b of document.querySelectorAll('[data-back]')) b.onclick = () => history.back();
 window.addEventListener('popstate', (e) => showView((e.state && e.state.v) || 'home'));
 
